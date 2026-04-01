@@ -63,7 +63,7 @@ function Home() {
                 </div>
             ) : (
                 <div style={styles.message}>
-                    <h1 style={styles.welcomeText}>Welcome to the Store</h1>
+                    <h1 style={styles.welcomeText}>Welcome to the Store, Aaron</h1>
                     <p style={styles.description}>
                         Please <span style={styles.highlight}>log in</span> to continue browsing our collection.
                     </p>
