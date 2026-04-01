@@ -1,226 +1,192 @@
 import { useState } from 'react';
+import api from './api/axiosConfig';
 
 function MagazineForm({ onMagazineAdded }) {
     const [title, setTitle] = useState('');
-    const [price, setPrice] = useState('');
-    const [orderQty, setOrderQty] = useState('');
-    const [copies, setCopies] = useState('');
+    const [price, setPrice] = useState(0);
+    const [orderQty, setOrderQty] = useState(1);
     const [currentIssue, setCurrentIssue] = useState('');
+    const [isHovered, setIsHovered] = useState(false);
+    const [focusedInput, setFocusedInput] = useState(null);
 
     const handleSubmit = (e) => {
         e.preventDefault();
-
-        // Ensure we have valid numbers, not empty strings
         const newMagazine = {
-            title: title.trim(),
-            price: price === '' ? 0 : parseFloat(price),
-            orderQty: orderQty === '' ? 0 : parseInt(orderQty, 10),
-            copies: copies === '' ? 1 : parseInt(copies, 10),
+            title,
+            price: parseFloat(price),
+            copies: 1,
+            orderQty: parseInt(orderQty),
+            currentIssue: currentIssue + "T00:00:00"
         };
 
-        // Only add currentIssue if it has a value
-        if (currentIssue) {
-            newMagazine.currentIssue = currentIssue;
-        }
-
-        console.log('Sending magazine:', newMagazine); // For debugging
-
-        fetch('/api/magazines', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(newMagazine),
-        })
-            .then(response => {
-                if (!response.ok) {
-                    return response.text().then(text => {
-                        throw new Error(text);
-                    });
-                }
-                return response.json();
-            })
-            .then(savedMagazine => {
+        api.post('/magazines', newMagazine)
+            .then(res => {
                 alert("Magazine Saved!");
-                onMagazineAdded(savedMagazine);
-                // Reset form
+                onMagazineAdded(res.data);
                 setTitle('');
-                setPrice('');
-                setCopies('');
-                setOrderQty('');
+                setPrice(0);
+                setOrderQty(1);
                 setCurrentIssue('');
-            })
-            .catch(error => {
-                console.error('Error saving magazine:', error);
-                alert('Error saving magazine: ' + error.message);
             });
     };
 
-    return (
-        <form onSubmit={handleSubmit} style={{
-            border: '2px solid #2e7d32',
-            padding: '20px',
+    const styles = {
+        form: {
+            backgroundColor: '#1e1e1e',
+            borderRadius: '12px',
+            padding: '24px',
+            border: '1px solid #2d2d2d',
+        },
+        title: {
+            color: '#00adb5',
+            fontSize: '1.5rem',
+            fontWeight: '600',
             marginBottom: '20px',
+        },
+        formGroup: {
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '20px',
+        },
+        inputGroup: {
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '8px',
+        },
+        label: {
+            color: '#b0b0b0',
+            fontSize: '14px',
+            fontWeight: '500',
+            letterSpacing: '0.5px',
+            textTransform: 'uppercase',
+        },
+        input: {
+            backgroundColor: '#2a2a2a',
+            border: '1px solid #3a3a3a',
             borderRadius: '8px',
-            backgroundColor: '#ffffff', // White background
-            color: '#333333', // Dark gray text
-            boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-        }}>
-            <h3 style={{
-                color: '#2e7d32',
-                marginTop: '0',
-                marginBottom: '20px',
-                fontSize: '1.5rem'
-            }}>
-                Add New Magazine
-            </h3>
+            padding: '12px 16px',
+            color: '#ffffff',
+            fontSize: '16px',
+            transition: 'all 0.3s ease',
+            outline: 'none',
+        },
+        button: {
+            backgroundColor: '#00adb5',
+            color: '#ffffff',
+            border: 'none',
+            borderRadius: '8px',
+            padding: '12px 24px',
+            fontSize: '16px',
+            fontWeight: '600',
+            cursor: 'pointer',
+            transition: 'all 0.3s ease',
+            textTransform: 'uppercase',
+            letterSpacing: '0.5px',
+            marginTop: '8px',
+        },
+    };
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <label style={{
-                        minWidth: '120px',
-                        fontWeight: 'bold',
-                        color: '#333333'
-                    }}>
-                        Title:
-                    </label>
+    return (
+        <form onSubmit={handleSubmit} style={styles.form}>
+            <h3 style={styles.title}>Add New Magazine</h3>
+            <div style={styles.formGroup}>
+                <div style={styles.inputGroup}>
+                    <label style={styles.label}>Title</label>
                     <input
                         type="text"
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
                         required
                         style={{
-                            padding: '8px 12px',
-                            borderRadius: '4px',
-                            border: '1px solid #cccccc',
-                            backgroundColor: '#ffffff',
-                            color: '#333333',
-                            flex: '1',
-                            fontSize: '14px'
+                            ...styles.input,
+                            ...(focusedInput === 'title' && {
+                                borderColor: '#00adb5',
+                                boxShadow: '0 0 0 2px rgba(0, 173, 181, 0.2)',
+                            }),
                         }}
+                        onFocus={() => setFocusedInput('title')}
+                        onBlur={() => setFocusedInput(null)}
+                        placeholder="Enter magazine title"
                     />
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <label style={{
-                        minWidth: '120px',
-                        fontWeight: 'bold',
-                        color: '#333333'
-                    }}>
-                        Price ($):
-                    </label>
+                <div style={styles.inputGroup}>
+                    <label style={styles.label}>Price ($)</label>
                     <input
                         type="number"
+                        min="0"
+                        step="0.01"
                         value={price}
                         onChange={(e) => setPrice(e.target.value)}
                         required
-                        step="0.01"
-                        min="0"
                         style={{
-                            padding: '8px 12px',
-                            borderRadius: '4px',
-                            border: '1px solid #cccccc',
-                            backgroundColor: '#ffffff',
-                            color: '#333333',
-                            width: '150px',
-                            fontSize: '14px'
+                            ...styles.input,
+                            ...(focusedInput === 'price' && {
+                                borderColor: '#00adb5',
+                                boxShadow: '0 0 0 2px rgba(0, 173, 181, 0.2)',
+                            }),
                         }}
+                        onFocus={() => setFocusedInput('price')}
+                        onBlur={() => setFocusedInput(null)}
+                        placeholder="0.00"
                     />
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <label style={{
-                        minWidth: '120px',
-                        fontWeight: 'bold',
-                        color: '#333333'
-                    }}>
-                        Order Quantity:
-                    </label>
+                <div style={styles.inputGroup}>
+                    <label style={styles.label}>Order Quantity</label>
                     <input
                         type="number"
+                        min="1"
                         value={orderQty}
                         onChange={(e) => setOrderQty(e.target.value)}
                         required
-                        min="0"
                         style={{
-                            padding: '8px 12px',
-                            borderRadius: '4px',
-                            border: '1px solid #cccccc',
-                            backgroundColor: '#ffffff',
-                            color: '#333333',
-                            width: '150px',
-                            fontSize: '14px'
+                            ...styles.input,
+                            ...(focusedInput === 'orderQty' && {
+                                borderColor: '#00adb5',
+                                boxShadow: '0 0 0 2px rgba(0, 173, 181, 0.2)',
+                            }),
                         }}
+                        onFocus={() => setFocusedInput('orderQty')}
+                        onBlur={() => setFocusedInput(null)}
+                        placeholder="1"
                     />
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <label style={{
-                        minWidth: '120px',
-                        fontWeight: 'bold',
-                        color: '#333333'
-                    }}>
-                        Copies:
-                    </label>
+                <div style={styles.inputGroup}>
+                    <label style={styles.label}>Current Issue Date</label>
                     <input
-                        type="number"
-                        value={copies}
-                        onChange={(e) => setCopies(e.target.value)}
-                        required
-                        min="1"
-                        style={{
-                            padding: '8px 12px',
-                            borderRadius: '4px',
-                            border: '1px solid #cccccc',
-                            backgroundColor: '#ffffff',
-                            color: '#333333',
-                            width: '150px',
-                            fontSize: '14px'
-                        }}
-                    />
-                </div>
-
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <label style={{
-                        minWidth: '120px',
-                        fontWeight: 'bold',
-                        color: '#333333'
-                    }}>
-                        Current Issue:
-                    </label>
-                    <input
-                        type="datetime-local"
+                        type="date"
                         value={currentIssue}
                         onChange={(e) => setCurrentIssue(e.target.value)}
+                        required
                         style={{
-                            padding: '8px 12px',
-                            borderRadius: '4px',
-                            border: '1px solid #cccccc',
-                            backgroundColor: '#ffffff',
-                            color: '#333333',
-                            fontSize: '14px'
+                            ...styles.input,
+                            ...(focusedInput === 'date' && {
+                                borderColor: '#00adb5',
+                                boxShadow: '0 0 0 2px rgba(0, 173, 181, 0.2)',
+                            }),
                         }}
+                        onFocus={() => setFocusedInput('date')}
+                        onBlur={() => setFocusedInput(null)}
                     />
                 </div>
 
-                <div style={{ marginTop: '20px' }}>
-                    <button
-                        type="submit"
-                        style={{
-                            padding: '10px 24px',
-                            backgroundColor: '#2e7d32',
-                            color: '#ffffff',
-                            border: 'none',
-                            borderRadius: '4px',
-                            cursor: 'pointer',
-                            fontSize: '16px',
-                            fontWeight: 'bold',
-                            transition: 'background-color 0.2s'
-                        }}
-                        onMouseOver={(e) => e.target.style.backgroundColor = '#1b5e20'}
-                        onMouseOut={(e) => e.target.style.backgroundColor = '#2e7d32'}
-                    >
-                        Save to Database
-                    </button>
-                </div>
+                <button
+                    type="submit"
+                    style={{
+                        ...styles.button,
+                        ...(isHovered && {
+                            backgroundColor: '#008c94',
+                            transform: 'translateY(-1px)',
+                            boxShadow: '0 4px 12px rgba(0, 173, 181, 0.3)',
+                        }),
+                    }}
+                    onMouseEnter={() => setIsHovered(true)}
+                    onMouseLeave={() => setIsHovered(false)}
+                >
+                    Save to Database
+                </button>
             </div>
         </form>
     );

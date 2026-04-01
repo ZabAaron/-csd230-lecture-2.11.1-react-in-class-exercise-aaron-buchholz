@@ -1,155 +1,165 @@
 import { useState } from 'react';
+import api from './api/axiosConfig';
 
 function BookForm({ onBookAdded }) {
     const [title, setTitle] = useState('');
     const [author, setAuthor] = useState('');
-    const [price, setPrice] = useState('');
-    const [copies, setCopies] = useState('');
+    const [price, setPrice] = useState(0);
+    const [isHovered, setIsHovered] = useState(false);
 
     const handleSubmit = (e) => {
         e.preventDefault();
+        const newBook = { title, author, price: parseFloat(price), copies: 1 };
 
-        const newBook = {
-            title: title.trim(),
-            author: author.trim(),
-            price: price === '' ? 0 : parseFloat(price),
-            copies: copies === '' ? 1 : parseInt(copies, 10)
-        };
-
-        fetch('/api/books', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify(newBook),
-        })
-            .then(response => {
-                if (!response.ok) {
-                    return response.text().then(text => {
-                        throw new Error(text);
-                    });
-                }
-                return response.json();
-            })
-            .then(savedBook => {
+        api.post('/books', newBook)
+            .then(res => {
                 alert("Book Saved!");
-                onBookAdded(savedBook);
+                onBookAdded(res.data);
                 setTitle('');
                 setAuthor('');
-                setPrice('');
-                setCopies('');
-            })
-            .catch(error => {
-                console.error('Error saving book:', error);
-                alert('Error saving book: ' + error.message);
+                setPrice(0);
             });
     };
 
-    return (
-        <form onSubmit={handleSubmit} style={{
-            border: '2px solid #000000',
-            padding: '20px',
+    const styles = {
+        form: {
+            backgroundColor: '#1e1e1e',
+            borderRadius: '12px',
+            padding: '24px',
+            border: '1px solid #2d2d2d',
+        },
+        title: {
+            color: '#00adb5',
+            fontSize: '1.5rem',
+            fontWeight: '600',
             marginBottom: '20px',
+        },
+        formGroup: {
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '20px',
+        },
+        inputGroup: {
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '8px',
+        },
+        label: {
+            color: '#b0b0b0',
+            fontSize: '14px',
+            fontWeight: '500',
+            letterSpacing: '0.5px',
+            textTransform: 'uppercase',
+        },
+        input: {
+            backgroundColor: '#2a2a2a',
+            border: '1px solid #3a3a3a',
             borderRadius: '8px',
-            backgroundColor: '#ffffff',
-            color: '#000000'
-        }}>
-            <h3 style={{ color: '#000000', marginTop: '0', marginBottom: '20px' }}>Add New Book</h3>
+            padding: '12px 16px',
+            color: '#ffffff',
+            fontSize: '16px',
+            transition: 'all 0.3s ease',
+            outline: 'none',
+        },
+        button: {
+            backgroundColor: '#00adb5',
+            color: '#ffffff',
+            border: 'none',
+            borderRadius: '8px',
+            padding: '12px 24px',
+            fontSize: '16px',
+            fontWeight: '600',
+            cursor: 'pointer',
+            transition: 'all 0.3s ease',
+            textTransform: 'uppercase',
+            letterSpacing: '0.5px',
+            marginTop: '8px',
+        },
+    };
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <label style={{ minWidth: '100px', fontWeight: 'bold', color: '#000000' }}>Title:</label>
+    const [focusedInput, setFocusedInput] = useState(null);
+
+    return (
+        <form onSubmit={handleSubmit} style={styles.form}>
+            <h3 style={styles.title}>Add New Book</h3>
+            <div style={styles.formGroup}>
+                <div style={styles.inputGroup}>
+                    <label style={styles.label}>Title</label>
                     <input
                         type="text"
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
                         required
                         style={{
-                            padding: '8px',
-                            borderRadius: '4px',
-                            border: '1px solid #000000',
-                            backgroundColor: '#ffffff',
-                            color: '#000000',
-                            flex: '1'
+                            ...styles.input,
+                            ...(focusedInput === 'title' && {
+                                borderColor: '#00adb5',
+                                boxShadow: '0 0 0 2px rgba(0, 173, 181, 0.2)',
+                            }),
                         }}
+                        onFocus={() => setFocusedInput('title')}
+                        onBlur={() => setFocusedInput(null)}
+                        placeholder="Enter book title"
                     />
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <label style={{ minWidth: '100px', fontWeight: 'bold', color: '#000000' }}>Author:</label>
+                <div style={styles.inputGroup}>
+                    <label style={styles.label}>Author</label>
                     <input
                         type="text"
                         value={author}
                         onChange={(e) => setAuthor(e.target.value)}
                         required
                         style={{
-                            padding: '8px',
-                            borderRadius: '4px',
-                            border: '1px solid #000000',
-                            backgroundColor: '#ffffff',
-                            color: '#000000',
-                            flex: '1'
+                            ...styles.input,
+                            ...(focusedInput === 'author' && {
+                                borderColor: '#00adb5',
+                                boxShadow: '0 0 0 2px rgba(0, 173, 181, 0.2)',
+                            }),
                         }}
+                        onFocus={() => setFocusedInput('author')}
+                        onBlur={() => setFocusedInput(null)}
+                        placeholder="Enter author name"
                     />
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <label style={{ minWidth: '100px', fontWeight: 'bold', color: '#000000' }}>Price ($):</label>
+                <div style={styles.inputGroup}>
+                    <label style={styles.label}>Price ($)</label>
                     <input
                         type="number"
+                        min="0"
+                        step="0.01"
                         value={price}
                         onChange={(e) => setPrice(e.target.value)}
                         required
-                        step="0.01"
-                        min="0"
                         style={{
-                            padding: '8px',
-                            borderRadius: '4px',
-                            border: '1px solid #000000',
-                            backgroundColor: '#ffffff',
-                            color: '#000000',
-                            width: '150px'
+                            ...styles.input,
+                            ...(focusedInput === 'price' && {
+                                borderColor: '#00adb5',
+                                boxShadow: '0 0 0 2px rgba(0, 173, 181, 0.2)',
+                            }),
                         }}
+                        onFocus={() => setFocusedInput('price')}
+                        onBlur={() => setFocusedInput(null)}
+                        placeholder="0.00"
                     />
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <label style={{ minWidth: '100px', fontWeight: 'bold', color: '#000000' }}>Copies:</label>
-                    <input
-                        type="number"
-                        value={copies}
-                        onChange={(e) => setCopies(e.target.value)}
-                        required
-                        min="1"
-                        style={{
-                            padding: '8px',
-                            borderRadius: '4px',
-                            border: '1px solid #000000',
-                            backgroundColor: '#ffffff',
-                            color: '#000000',
-                            width: '150px'
-                        }}
-                    />
-                </div>
-
-                <div style={{ marginTop: '20px' }}>
-                    <button
-                        type="submit"
-                        style={{
-                            padding: '10px 20px',
-                            backgroundColor: '#000000',
-                            color: '#ffffff',
-                            border: 'none',
-                            borderRadius: '4px',
-                            cursor: 'pointer',
-                            fontSize: '16px',
-                            fontWeight: 'bold'
-                        }}
-                    >
-                        Save to Database
-                    </button>
-                </div>
+                <button
+                    type="submit"
+                    style={{
+                        ...styles.button,
+                        ...(isHovered && {
+                            backgroundColor: '#008c94',
+                            transform: 'translateY(-1px)',
+                            boxShadow: '0 4px 12px rgba(0, 173, 181, 0.3)',
+                        }),
+                    }}
+                    onMouseEnter={() => setIsHovered(true)}
+                    onMouseLeave={() => setIsHovered(false)}
+                >
+                    Save to Database
+                </button>
             </div>
         </form>
     );

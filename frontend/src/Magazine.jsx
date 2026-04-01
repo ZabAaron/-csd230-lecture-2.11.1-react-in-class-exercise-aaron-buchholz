@@ -1,254 +1,213 @@
 import { useState } from 'react';
 
-function Magazine({ id, title, price, orderQty, currentIssue, onDelete, onUpdate }) {
+function Magazine({ id, title, price, orderQty, currentIssue, isAdmin, onDelete, onUpdate }) {
     const [isEditing, setIsEditing] = useState(false);
-    const [editTitle, setEditTitle] = useState(title);
-    const [editPrice, setEditPrice] = useState(price);
-    const [editOrderQty, setEditOrderQty] = useState(orderQty);
-    const [editCurrentIssue, setEditCurrentIssue] = useState(currentIssue || '');
+    const [tempTitle, setTempTitle] = useState(title);
+    const [tempPrice, setTempPrice] = useState(price);
+    const [tempOrderQty, setTempOrderQty] = useState(orderQty);
+    const [tempCurrentIssue, setTempCurrentIssue] = useState(
+        currentIssue ? currentIssue.substring(0, 10) : ''
+    );
+    const [isHovered, setIsHovered] = useState(false);
 
-    // Format the date for display
-    const formatDate = (dateString) => {
-        if (!dateString) return 'No issue date set';
-        try {
-            const date = new Date(dateString);
-            if (isNaN(date.getTime())) return 'Invalid date';
-            return date.toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            });
-        } catch (e) {
-            return 'Invalid date';
-        }
-    };
-
-    // Format date for datetime-local input
-    const formatDateForInput = (dateString) => {
-        if (!dateString) return '';
-        try {
-            const date = new Date(dateString);
-            if (isNaN(date.getTime())) return '';
-            const year = date.getFullYear();
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const day = String(date.getDate()).padStart(2, '0');
-            const hours = String(date.getHours()).padStart(2, '0');
-            const minutes = String(date.getMinutes()).padStart(2, '0');
-            return `${year}-${month}-${day}T${hours}:${minutes}`;
-        } catch (e) {
-            return '';
-        }
-    };
-
-    const handleUpdate = () => {
+    const handleSave = () => {
         const updatedMagazine = {
-            id: id,
-            title: editTitle,
-            price: parseFloat(editPrice),
-            orderQty: parseInt(editOrderQty, 10),
-            copies: 1, // You might want to make this editable too
+            id,
+            title: tempTitle,
+            price: parseFloat(tempPrice),
+            copies: 1,
+            orderQty: parseInt(tempOrderQty),
+            currentIssue: tempCurrentIssue + "T00:00:00"
         };
-
-        if (editCurrentIssue) {
-            updatedMagazine.currentIssue = editCurrentIssue;
-        }
-
         onUpdate(id, updatedMagazine);
         setIsEditing(false);
     };
 
+    const formatDate = (dateStr) => {
+        if (!dateStr) return 'N/A';
+        return new Date(dateStr).toLocaleDateString();
+    };
+
+    const styles = {
+        card: {
+            backgroundColor: '#1e1e1e',
+            border: '1px solid #2d2d2d',
+            borderRadius: '12px',
+            margin: '12px 0',
+            padding: '20px',
+            transition: 'all 0.3s ease',
+            ...(isHovered && {
+                transform: 'translateY(-2px)',
+                boxShadow: '0 8px 24px rgba(0, 0, 0, 0.3)',
+                borderColor: '#00adb5',
+            }),
+        },
+        content: {
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: '16px',
+        },
+        info: {
+            flex: 1,
+        },
+        title: {
+            color: '#ffffff',
+            fontSize: '1.25rem',
+            fontWeight: '600',
+            margin: '0 0 8px 0',
+        },
+        details: {
+            color: '#b0b0b0',
+            margin: 0,
+            fontSize: '0.9rem',
+        },
+        price: {
+            color: '#00adb5',
+            fontWeight: '600',
+        },
+        buttonGroup: {
+            display: 'flex',
+            gap: '8px',
+        },
+        editButton: {
+            backgroundColor: '#2a2a2a',
+            color: '#ffc107',
+            border: '1px solid #ffc107',
+            padding: '8px 16px',
+            borderRadius: '6px',
+            cursor: 'pointer',
+            fontSize: '14px',
+            fontWeight: '500',
+            transition: 'all 0.2s ease',
+        },
+        deleteButton: {
+            backgroundColor: '#2a2a2a',
+            color: '#dc3545',
+            border: '1px solid #dc3545',
+            padding: '8px 16px',
+            borderRadius: '6px',
+            cursor: 'pointer',
+            fontSize: '14px',
+            fontWeight: '500',
+            transition: 'all 0.2s ease',
+        },
+        editForm: {
+            backgroundColor: '#1e1e1e',
+            border: '2px solid #00adb5',
+            borderRadius: '12px',
+            margin: '12px 0',
+            padding: '20px',
+        },
+        editInput: {
+            backgroundColor: '#2a2a2a',
+            border: '1px solid #3a3a3a',
+            borderRadius: '6px',
+            padding: '10px 12px',
+            color: '#ffffff',
+            fontSize: '14px',
+            outline: 'none',
+            transition: 'all 0.2s ease',
+        },
+        saveButton: {
+            backgroundColor: '#00adb5',
+            color: 'white',
+            border: 'none',
+            padding: '10px 20px',
+            borderRadius: '6px',
+            cursor: 'pointer',
+            fontSize: '14px',
+            fontWeight: '500',
+            transition: 'all 0.2s ease',
+        },
+        cancelButton: {
+            backgroundColor: '#2a2a2a',
+            color: '#b0b0b0',
+            border: '1px solid #3a3a3a',
+            padding: '10px 20px',
+            borderRadius: '6px',
+            cursor: 'pointer',
+            fontSize: '14px',
+            fontWeight: '500',
+            transition: 'all 0.2s ease',
+        },
+    };
+
     if (isEditing) {
         return (
-            <div style={{
-                border: '3px solid #ffc107',
-                margin: '10px',
-                padding: '15px',
-                width: '280px',
-                backgroundColor: '#fff9e6',
-                borderRadius: '8px',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-            }}>
-                <h3 style={{ color: '#856404', marginTop: '0' }}>Edit Magazine</h3>
-
-                <div style={{ marginBottom: '10px' }}>
-                    <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '3px' }}>Title:</label>
+            <div style={styles.editForm}>
+                <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
                     <input
                         type="text"
-                        value={editTitle}
-                        onChange={(e) => setEditTitle(e.target.value)}
-                        style={{
-                            width: '100%',
-                            padding: '5px',
-                            borderRadius: '4px',
-                            border: '1px solid #ccc',
-                            boxSizing: 'border-box'
-                        }}
+                        value={tempTitle}
+                        onChange={(e) => setTempTitle(e.target.value)}
+                        style={{ ...styles.editInput, flex: 2 }}
+                        placeholder="Title"
                     />
-                </div>
-
-                <div style={{ marginBottom: '10px' }}>
-                    <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '3px' }}>Price:</label>
                     <input
                         type="number"
-                        value={editPrice}
-                        onChange={(e) => setEditPrice(e.target.value)}
+                        value={tempPrice}
+                        onChange={(e) => setTempPrice(e.target.value)}
+                        style={{ ...styles.editInput, width: '100px' }}
+                        placeholder="Price"
                         step="0.01"
-                        min="0"
-                        style={{
-                            width: '100%',
-                            padding: '5px',
-                            borderRadius: '4px',
-                            border: '1px solid #ccc',
-                            boxSizing: 'border-box'
-                        }}
                     />
-                </div>
-
-                <div style={{ marginBottom: '10px' }}>
-                    <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '3px' }}>Order Quantity:</label>
                     <input
                         type="number"
-                        value={editOrderQty}
-                        onChange={(e) => setEditOrderQty(e.target.value)}
-                        min="0"
-                        style={{
-                            width: '100%',
-                            padding: '5px',
-                            borderRadius: '4px',
-                            border: '1px solid #ccc',
-                            boxSizing: 'border-box'
-                        }}
+                        value={tempOrderQty}
+                        onChange={(e) => setTempOrderQty(e.target.value)}
+                        style={{ ...styles.editInput, width: '100px' }}
+                        placeholder="Order Qty"
                     />
-                </div>
-
-                <div style={{ marginBottom: '15px' }}>
-                    <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '3px' }}>Current Issue:</label>
                     <input
-                        type="datetime-local"
-                        value={formatDateForInput(editCurrentIssue)}
-                        onChange={(e) => setEditCurrentIssue(e.target.value)}
-                        style={{
-                            width: '100%',
-                            padding: '5px',
-                            borderRadius: '4px',
-                            border: '1px solid #ccc',
-                            boxSizing: 'border-box'
-                        }}
+                        type="date"
+                        value={tempCurrentIssue}
+                        onChange={(e) => setTempCurrentIssue(e.target.value)}
+                        style={{ ...styles.editInput, width: '150px' }}
                     />
-                </div>
-
-                <div style={{ display: 'flex', gap: '10px' }}>
-                    <button
-                        onClick={handleUpdate}
-                        style={{
-                            backgroundColor: '#28a745',
-                            color: 'white',
-                            border: 'none',
-                            padding: '8px 16px',
-                            borderRadius: '4px',
-                            cursor: 'pointer',
-                            flex: 1,
-                            fontWeight: 'bold'
-                        }}
-                    >
-                        Save
-                    </button>
-                    <button
-                        onClick={() => setIsEditing(false)}
-                        style={{
-                            backgroundColor: '#6c757d',
-                            color: 'white',
-                            border: 'none',
-                            padding: '8px 16px',
-                            borderRadius: '4px',
-                            cursor: 'pointer',
-                            flex: 1,
-                            fontWeight: 'bold'
-                        }}
-                    >
-                        Cancel
-                    </button>
+                    <button onClick={handleSave} style={styles.saveButton}>Save</button>
+                    <button onClick={() => setIsEditing(false)} style={styles.cancelButton}>Cancel</button>
                 </div>
             </div>
         );
     }
 
-    // Regular display view
     return (
-        <div style={{
-            border: '2px solid #2e7d32',
-            margin: '10px',
-            padding: '15px',
-            width: '280px',
-            backgroundColor: '#ffffff',
-            borderRadius: '8px',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-            color: '#333333'
-        }}>
-            <h3 style={{
-                color: '#1b5e20',
-                marginTop: '0',
-                marginBottom: '10px',
-                fontSize: '1.3rem',
-                borderBottom: '2px solid #e0e0e0',
-                paddingBottom: '8px'
-            }}>
-                {title || 'Untitled'}
-            </h3>
-
-            <div style={{ marginBottom: '15px' }}>
-                <p style={{ margin: '5px 0', color: '#333333' }}>
-                    <strong style={{ color: '#2e7d32' }}>Price:</strong> ${typeof price === 'number' ? price.toFixed(2) : '0.00'}
-                </p>
-                <p style={{ margin: '5px 0', color: '#333333' }}>
-                    <strong style={{ color: '#2e7d32' }}>Order Qty:</strong> {orderQty || 0}
-                </p>
-                <p style={{ margin: '5px 0', color: '#333333' }}>
-                    <strong style={{ color: '#2e7d32' }}>Current Issue:</strong> {formatDate(currentIssue)}
-                </p>
-            </div>
-
-            <div style={{ display: 'flex', gap: '10px', marginTop: '15px' }}>
-                <button
-                    onClick={() => onDelete(id)}
-                    style={{
-                        backgroundColor: '#dc3545',
-                        color: '#ffffff',
-                        border: 'none',
-                        padding: '8px 16px',
-                        borderRadius: '4px',
-                        cursor: 'pointer',
-                        flex: 1,
-                        fontSize: '14px',
-                        fontWeight: 'bold',
-                        transition: 'background-color 0.2s'
-                    }}
-                    onMouseOver={(e) => e.target.style.backgroundColor = '#c82333'}
-                    onMouseOut={(e) => e.target.style.backgroundColor = '#dc3545'}
-                >
-                    Delete
-                </button>
-                <button
-                    onClick={() => setIsEditing(true)}
-                    style={{
-                        backgroundColor: '#ffc107',
-                        color: '#333333',
-                        border: 'none',
-                        padding: '8px 16px',
-                        borderRadius: '4px',
-                        cursor: 'pointer',
-                        flex: 1,
-                        fontSize: '14px',
-                        fontWeight: 'bold',
-                        transition: 'background-color 0.2s'
-                    }}
-                    onMouseOver={(e) => e.target.style.backgroundColor = '#e0a800'}
-                    onMouseOut={(e) => e.target.style.backgroundColor = '#ffc107'}
-                >
-                    Update
-                </button>
+        <div
+            style={styles.card}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+        >
+            <div style={styles.content}>
+                <div style={styles.info}>
+                    <h3 style={styles.title}>{title}</h3>
+                    <p style={styles.details}>
+                        <strong>Price:</strong> <span style={styles.price}>${price.toFixed(2)}</span> |{' '}
+                        <strong>Order Qty:</strong> {orderQty} |{' '}
+                        <strong>Issue:</strong> {formatDate(currentIssue)}
+                    </p>
+                </div>
+                {isAdmin && (
+                    <div style={styles.buttonGroup}>
+                        <button
+                            onClick={() => setIsEditing(true)}
+                            style={styles.editButton}
+                            onMouseEnter={(e) => e.target.style.backgroundColor = '#ffc10720'}
+                            onMouseLeave={(e) => e.target.style.backgroundColor = '#2a2a2a'}
+                        >
+                            Edit
+                        </button>
+                        <button
+                            onClick={() => onDelete(id)}
+                            style={styles.deleteButton}
+                            onMouseEnter={(e) => e.target.style.backgroundColor = '#dc354520'}
+                            onMouseLeave={(e) => e.target.style.backgroundColor = '#2a2a2a'}
+                        >
+                            Delete
+                        </button>
+                    </div>
+                )}
             </div>
         </div>
     );

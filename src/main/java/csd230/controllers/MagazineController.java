@@ -9,7 +9,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/magazines")
-@CrossOrigin(origins = "http://localhost:5173") // Allow Vite React App
+@CrossOrigin(origins = "http://localhost:5173")
 public class MagazineController {
 
     private final MagazineRepository magazineRepository;
@@ -18,13 +18,11 @@ public class MagazineController {
         this.magazineRepository = magazineRepository;
     }
 
-    // GET all magazines
     @GetMapping
     public List<MagazineEntity> getAllMagazines() {
         return magazineRepository.findAll();
     }
 
-    // GET single magazine
     @GetMapping("/{id}")
     public ResponseEntity<MagazineEntity> getMagazineById(@PathVariable Long id) {
         return magazineRepository.findById(id)
@@ -32,13 +30,11 @@ public class MagazineController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // POST create magazine
     @PostMapping
     public MagazineEntity createMagazine(@RequestBody MagazineEntity magazine) {
         return magazineRepository.save(magazine);
     }
 
-    // PUT update magazine
     @PutMapping("/{id}")
     public ResponseEntity<MagazineEntity> updateMagazine(@PathVariable Long id, @RequestBody MagazineEntity magazineDetails) {
         return magazineRepository.findById(id).map(magazine -> {
@@ -51,7 +47,6 @@ public class MagazineController {
         }).orElse(ResponseEntity.notFound().build());
     }
 
-    // DELETE magazine
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteMagazine(@PathVariable Long id) {
         if (magazineRepository.existsById(id)) {
