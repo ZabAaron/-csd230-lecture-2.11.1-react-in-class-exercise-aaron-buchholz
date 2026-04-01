@@ -1,3 +1,4 @@
+// frontend/src/Navbar.jsx
 import { Link } from 'react-router';
 import { useAuth } from './auth/AuthProvider';
 import { useState } from 'react';
@@ -110,15 +111,15 @@ function Navbar() {
                 <>
                     <NavLink to="/inventory">Books</NavLink>
                     <NavLink to="/magazines">Magazines</NavLink>
-                    <NavLink to="/tshirts">T-Shirts</NavLink>
-                    <NavLink to="/jackets">Jackets</NavLink>
+                    <NavLink to="/laptops">Laptops</NavLink>
+                    <NavLink to="/phones">Phones</NavLink>
 
                     {isAdmin && (
                         <>
                             <AddLink to="/add">+ Book</AddLink>
                             <AddLink to="/add-magazine">+ Magazine</AddLink>
-                            <AddLink to="/add-tshirt">+ T-Shirt</AddLink>
-                            <AddLink to="/add-jacket">+ Jacket</AddLink>
+                            <AddLink to="/add-laptop">+ Laptop</AddLink>
+                            <AddLink to="/add-phone">+ Phone</AddLink>
                         </>
                     )}
 

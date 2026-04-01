@@ -1,3 +1,4 @@
+// frontend/src/App.jsx
 import { useState, useEffect } from 'react'
 import { Routes, Route } from 'react-router'
 import api from './api/axiosConfig'
@@ -10,17 +11,17 @@ import Book from './Book'
 import BookForm from './BookForm'
 import Magazine from './Magazine'
 import MagazineForm from './MagazineForm'
-import TShirt from './TShirt'
-import TShirtForm from './TShirtForm'
-import Jacket from './Jacket'
-import JacketForm from './JacketForm'
+import Laptop from './Laptop'
+import LaptopForm from './LaptopForm'
+import Phone from './Phone'
+import PhoneForm from './PhoneForm'
 
 function App() {
     const { token, isAdmin } = useAuth();
     const [books, setBooks] = useState([]);
     const [magazines, setMagazines] = useState([]);
-    const [tshirts, setTShirts] = useState([]);
-    const [jackets, setJackets] = useState([]);
+    const [laptops, setLaptops] = useState([]);
+    const [phones, setPhones] = useState([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -32,13 +33,13 @@ function App() {
         Promise.all([
             api.get('/books').then(res => res.data),
             api.get('/magazines').then(res => res.data),
-            api.get('/tshirts').then(res => res.data),
-            api.get('/jackets').then(res => res.data)
-        ]).then(([bookData, magazineData, tshirtData, jacketData]) => {
+            api.get('/laptops').then(res => res.data),
+            api.get('/phones').then(res => res.data)
+        ]).then(([bookData, magazineData, laptopData, phoneData]) => {
             setBooks(bookData);
             setMagazines(magazineData);
-            setTShirts(tshirtData);
-            setJackets(jacketData);
+            setLaptops(laptopData);
+            setPhones(phoneData);
             setLoading(false);
         }).catch(() => setLoading(false));
     }, [token]);
@@ -67,28 +68,28 @@ function App() {
             .then(res => setMagazines(magazines.map(m => (m.id === id ? res.data : m))));
     };
 
-    const handleAddTShirt = (item) => setTShirts([...tshirts, item]);
+    const handleAddLaptop = (item) => setLaptops([...laptops, item]);
 
-    const handleDeleteTShirt = (id) => {
-        if (!window.confirm("Delete this t-shirt?")) return;
-        api.delete(`/tshirts/${id}`).then(() => setTShirts(tshirts.filter(t => t.id !== id)));
+    const handleDeleteLaptop = (id) => {
+        if (!window.confirm("Delete this laptop?")) return;
+        api.delete(`/laptops/${id}`).then(() => setLaptops(laptops.filter(t => t.id !== id)));
     };
 
-    const handleUpdateTShirt = (id, updatedData) => {
-        api.put(`/tshirts/${id}`, updatedData)
-            .then(res => setTShirts(tshirts.map(t => (t.id === id ? res.data : t))));
+    const handleUpdateLaptop = (id, updatedData) => {
+        api.put(`/laptops/${id}`, updatedData)
+            .then(res => setLaptops(laptops.map(t => (t.id === id ? res.data : t))));
     };
 
-    const handleAddJacket = (item) => setJackets([...jackets, item]);
+    const handleAddPhone = (item) => setPhones([...phones, item]);
 
-    const handleDeleteJacket = (id) => {
-        if (!window.confirm("Delete this jacket?")) return;
-        api.delete(`/jackets/${id}`).then(() => setJackets(jackets.filter(j => j.id !== id)));
+    const handleDeletePhone = (id) => {
+        if (!window.confirm("Delete this phone?")) return;
+        api.delete(`/phones/${id}`).then(() => setPhones(phones.filter(j => j.id !== id)));
     };
 
-    const handleUpdateJacket = (id, updatedData) => {
-        api.put(`/jackets/${id}`, updatedData)
-            .then(res => setJackets(jackets.map(j => (j.id === id ? res.data : j))));
+    const handleUpdatePhone = (id, updatedData) => {
+        api.put(`/phones/${id}`, updatedData)
+            .then(res => setPhones(phones.map(j => (j.id === id ? res.data : j))));
     };
 
     const styles = {
@@ -184,52 +185,52 @@ function App() {
                         </ProtectedRoute>
                     } />
 
-                    <Route path="/tshirts" element={
+                    <Route path="/laptops" element={
                         <ProtectedRoute>
                             <div>
-                                <h1 style={styles.pageTitle}>T-Shirt Inventory</h1>
-                                {tshirts.map((t) => (
-                                    <TShirt key={t.id} {...t} isAdmin={isAdmin} onDelete={handleDeleteTShirt} onUpdate={handleUpdateTShirt} />
+                                <h1 style={styles.pageTitle}>Laptop Inventory</h1>
+                                {laptops.map((t) => (
+                                    <Laptop key={t.id} {...t} isAdmin={isAdmin} onDelete={handleDeleteLaptop} onUpdate={handleUpdateLaptop} />
                                 ))}
-                                {tshirts.length === 0 && (
+                                {laptops.length === 0 && (
                                     <div style={{ textAlign: 'center', color: '#6c6c6c', padding: '40px' }}>
-                                        No t-shirts in inventory
+                                        No laptops in inventory
                                     </div>
                                 )}
                             </div>
                         </ProtectedRoute>
                     } />
 
-                    <Route path="/add-tshirt" element={
+                    <Route path="/add-laptop" element={
                         <ProtectedRoute>
                             <div>
-                                <h1 style={styles.pageTitle}>Add a T-Shirt</h1>
-                                <TShirtForm onTShirtAdded={handleAddTShirt} />
+                                <h1 style={styles.pageTitle}>Add a Laptop</h1>
+                                <LaptopForm onLaptopAdded={handleAddLaptop} />
                             </div>
                         </ProtectedRoute>
                     } />
 
-                    <Route path="/jackets" element={
+                    <Route path="/phones" element={
                         <ProtectedRoute>
                             <div>
-                                <h1 style={styles.pageTitle}>Jacket Inventory</h1>
-                                {jackets.map((j) => (
-                                    <Jacket key={j.id} {...j} isAdmin={isAdmin} onDelete={handleDeleteJacket} onUpdate={handleUpdateJacket} />
+                                <h1 style={styles.pageTitle}>Phone Inventory</h1>
+                                {phones.map((j) => (
+                                    <Phone key={j.id} {...j} isAdmin={isAdmin} onDelete={handleDeletePhone} onUpdate={handleUpdatePhone} />
                                 ))}
-                                {jackets.length === 0 && (
+                                {phones.length === 0 && (
                                     <div style={{ textAlign: 'center', color: '#6c6c6c', padding: '40px' }}>
-                                        No jackets in inventory
+                                        No phones in inventory
                                     </div>
                                 )}
                             </div>
                         </ProtectedRoute>
                     } />
 
-                    <Route path="/add-jacket" element={
+                    <Route path="/add-phone" element={
                         <ProtectedRoute>
                             <div>
-                                <h1 style={styles.pageTitle}>Add a Jacket</h1>
-                                <JacketForm onJacketAdded={handleAddJacket} />
+                                <h1 style={styles.pageTitle}>Add a Phone</h1>
+                                <PhoneForm onPhoneAdded={handleAddPhone} />
                             </div>
                         </ProtectedRoute>
                     } />

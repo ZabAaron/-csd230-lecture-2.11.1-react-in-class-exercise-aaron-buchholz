@@ -1,3 +1,4 @@
+// src/main/java/csd230/seeder/DataSeeder.java
 package csd230.seeder;
 
 import csd230.entities.*;
@@ -16,19 +17,19 @@ public class DataSeeder implements CommandLineRunner {
 
     private final BookRepository bookRepository;
     private final MagazineRepository magazineRepository;
-    private final TShirtRepository tShirtRepository;
-    private final JacketRepository jacketRepository;
+    private final LaptopRepository laptopRepository;
+    private final PhoneRepository phoneRepository;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final Faker faker;
 
     public DataSeeder(BookRepository bookRepository, MagazineRepository magazineRepository,
-                      TShirtRepository tShirtRepository, JacketRepository jacketRepository,
+                      LaptopRepository laptopRepository, PhoneRepository phoneRepository,
                       UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.bookRepository = bookRepository;
         this.magazineRepository = magazineRepository;
-        this.tShirtRepository = tShirtRepository;
-        this.jacketRepository = jacketRepository;
+        this.laptopRepository = laptopRepository;
+        this.phoneRepository = phoneRepository;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.faker = new Faker();
@@ -39,8 +40,8 @@ public class DataSeeder implements CommandLineRunner {
         if (bookRepository.count() == 0) {
             seedBooks();
             seedMagazines();
-            seedTShirts();
-            seedJackets();
+            seedLaptops();
+            seedPhones();
         }
         if (userRepository.count() == 0) {
             seedUsers();
@@ -82,30 +83,31 @@ public class DataSeeder implements CommandLineRunner {
         }
     }
 
-    private void seedTShirts() {
-        String[] sizes = {"S", "M", "L", "XL", "XXL"};
-        String[] sleeves = {"Short", "Long", "3/4"};
+    private void seedLaptops() {
+        String[] brands = {"Apple", "Dell", "HP", "Lenovo", "Asus"};
+        String[] processors = {"Intel i5", "Intel i7", "Intel i9", "AMD Ryzen 5", "AMD Ryzen 7", "Apple M1", "Apple M2"};
         for (int i = 0; i < 5; i++) {
-            TShirtEntity tshirt = new TShirtEntity(
-                    sizes[faker.number().numberBetween(0, sizes.length)],
-                    faker.number().randomDouble(2, 15, 60),
+            LaptopEntity laptop = new LaptopEntity(
+                    brands[faker.number().numberBetween(0, brands.length)],
+                    faker.number().randomDouble(2, 500, 2500),
                     faker.number().numberBetween(5, 30),
-                    sleeves[faker.number().numberBetween(0, sleeves.length)]
+                    processors[faker.number().numberBetween(0, processors.length)]
             );
-            tShirtRepository.save(tshirt);
+            laptopRepository.save(laptop);
         }
     }
 
-    private void seedJackets() {
-        String[] sizes = {"S", "M", "L", "XL", "XXL"};
+    private void seedPhones() {
+        String[] brands = {"Apple", "Samsung", "Google", "OnePlus", "Xiaomi"};
+        Integer[] storageOptions = {64, 128, 256, 512, 1024};
         for (int i = 0; i < 5; i++) {
-            JacketEntity jacket = new JacketEntity(
-                    sizes[faker.number().numberBetween(0, sizes.length)],
-                    faker.number().randomDouble(2, 50, 200),
-                    faker.number().numberBetween(3, 20),
-                    faker.bool().bool()
+            PhoneEntity phone = new PhoneEntity(
+                    brands[faker.number().numberBetween(0, brands.length)],
+                    faker.number().randomDouble(2, 300, 1200),
+                    faker.number().numberBetween(10, 50),
+                    storageOptions[faker.number().numberBetween(0, storageOptions.length)]
             );
-            jacketRepository.save(jacket);
+            phoneRepository.save(phone);
         }
     }
 }
