@@ -151,7 +151,7 @@ function Login() {
     return (
         <div style={styles.container}>
             <div style={styles.card}>
-                <h1 style={styles.title}>Welcome Back</h1>
+                <h1 style={styles.title}>Welcome Back, Aaron!</h1>
 
                 {expired && (
                     <div style={{ ...styles.alert, ...styles.expiredAlert }}>
