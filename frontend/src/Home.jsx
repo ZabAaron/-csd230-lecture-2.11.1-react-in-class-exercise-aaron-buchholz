@@ -54,8 +54,8 @@ function Home() {
                     </h1>
                     <p style={styles.description}>
                         {isAdmin
-                            ? "Manage your inventory, add new items, and keep track of your store."
-                            : "Browse our collection of books, magazines, and merchandise."}
+                            ? "Manage inventory, add new items, and keep track of store stock."
+                            : "Browse the collection of books, magazines, and electronics."}
                     </p>
                     <p style={{ ...styles.description, marginTop: '16px' }}>
                         Use the navigation bar above to get started.
@@ -65,7 +65,7 @@ function Home() {
                 <div style={styles.message}>
                     <h1 style={styles.welcomeText}>Welcome to the Store, Aaron</h1>
                     <p style={styles.description}>
-                        Please <span style={styles.highlight}>log in</span> to continue browsing our collection.
+                        Please log in to browse the collection.
                     </p>
                 </div>
             )}

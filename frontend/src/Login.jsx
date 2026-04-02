@@ -215,9 +215,9 @@ function Login() {
 
                 <div style={styles.footer}>
                     <span>Demo accounts: </span>
-                    <strong style={styles.footerStrong}>admin/admin</strong>
+                    <strong style={styles.footerStrong}>login with admin/admin</strong>
                     <span> (Admin) or </span>
-                    <strong style={styles.footerStrong}>user/user</strong>
+                    <strong style={styles.footerStrong}> login with user/user</strong>
                     <span> (User)</span>
                 </div>
             </div>
